@@ -1,7 +1,9 @@
 import os
 import pandas as pd
 import numpy as np
+import matplotlib
 fileroot = os.path.dirname(os.path.abspath(__file__))
+
 def get_data():
 	#import data from government into pandas dataframe
 	dict_list=[]
@@ -21,37 +23,45 @@ def get_data():
 	df=pd.DataFrame(dict_list)
 	return df
 
-def popular_name(df):
-	# get top 10 popular name of all time
-	grouped=df[['name','count']].groupby('name',sort=False)
-	#sort=False to speed up
-	#print grouped
-	print grouped.sum().sort('count',ascending=False)[0:9]
 
-def gender_ambiguous_n(df):
-	# get the most 20 gender neutral name of all time
+class BabyName:
+	def __init__(self):
+		self.df = get_data()
+
+
+	def popular_name(self):
+		# get top 10 popular name of all time
+		grouped=self.df[['name','count']].groupby('name',sort=False)
+		#sort=False to speed up
+		#print grouped
+		return grouped.sum().sort('count',ascending=False)[0:9]
+
+	def gender_ambiguous_n(self,n):
+		# get the n most gender neutral name of all time
+		df = self.df.copy()
+		df['count'][df['gender']=='F']*=-1
+		#print df
+		grouped=df[['name','gender','count']].groupby(['name'],sort=False)	
+		group_sum=grouped.sum()
+		group_sum['count']=group_sum['count'].abs()
+
+		return group_sum.sort('count')[0:n]
+
+	# get the most 3 popular name in a particular year	
+	def popular_name_byyr(self,yr):
+		
+		grouped_yr=self.df[['name','born_yr','count']].groupby(['born_yr'],sort=False).get_group(yr)
+		#print grouped.sum()
+		return grouped_yr['name'].tolist()[0:3]
+
+	def popularity_overyr(self):
+		pass	
+
+if __name__ == "__main__" :
+	b = BabyName()
+	print b.popular_name()
+	print b.gender_ambiguous_n(3)
+	# print b.gender_ambiguous_n(6)
 	
-	df['count'][df['gender']=='F']*=-1
-	grouped=df[['name','gender','count']].groupby(['name'],sort=False)	
-	group_sum=grouped.sum()
-	group_sum['count']=group_sum['count'].abs()
+	print popular_name_byyr(df,1910)
 
-	print group_sum.sort('count')[0:19]
-	
-def popular_name_byyr(df,yr):
-	
-	grouped_yr=df[['name','born_yr','count']].groupby(['born_yr'],sort=False).get_group(yr)
-	#print grouped.sum()
-	return grouped_yr['name'].tolist()[0:3]
-
-	# for name, group in grouped:
-	# 	print group
-	# 	print group.sum()
-
-	# 	raw_input('please enter')
-
-
-df=get_data()
-#popular_name(df)
-#gender_ambiguous_n(df)
-print popular_name_byyr(df,1910)
