@@ -63,5 +63,5 @@ if __name__ == "__main__" :
 	print b.gender_ambiguous_n(3)
 	# print b.gender_ambiguous_n(6)
 	
-	print popular_name_byyr(df,1910)
+	print b.popular_name_byyr(df,1910)
 
